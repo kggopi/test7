@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="203b5cc9-b91d-44b5-93a8-73dd4fc1e5e1" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="test1Flow" doc:id="c9ccfdf8-f7dd-4c5e-a6bb-ecb1fbb3db03" >
+		<http:listener doc:name="Listener" doc:id="773b7d0b-60a3-4c4d-befe-14858f353b8b" config-ref="HTTP_Listener_config" path="/de"/>
+		<ee:transform doc:name="Transform Message" doc:id="770d5236-92ba-4d34-b300-06ab18491a3b" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="loadscript" ><![CDATA[%dw 2.0
+output application/java
+var script = "classpath://dwl/" ++ attributes.queryParams.msg as String  ++ ".dwl"
+---
+readUrl(script,"text/plain")]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="1aa58d8f-392e-4744-96e1-8ffbc4b39436" />
+		<ee:dynamic-evaluate doc:name="Dynamic Evaluate" doc:id="96e8efe3-1d0b-4d61-ab18-fa9844dd3193" expression="#[vars.loadscript]">
+			<ee:parameters >#[payload]</ee:parameters>
+		</ee:dynamic-evaluate>
+	</flow>
+</mule>
